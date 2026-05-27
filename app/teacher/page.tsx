@@ -296,6 +296,7 @@ export default function TeacherPage() {
           const size = Math.min(250, 126 + group.count * 18);
           const color = palette[hashText(group.flowerName) % palette.length];
           const rotation = (hashText(`${group.flowerName}-turn`) % 18) - 9;
+          const shape = (hashText(`${group.flowerName}-shape`) % 4) + 1;
           const names = group.studentNames.slice(0, 5).join(", ");
           const extra = group.studentNames.length > 5 ? ` 외 ${group.studentNames.length - 5}명` : "";
 
@@ -303,7 +304,9 @@ export default function TeacherPage() {
             <button
               key={group.flowerName}
               type="button"
-              className={`flower-card${highlightedName === group.flowerName ? " is-highlighted" : ""}`}
+              className={`flower-card flower-shape-${shape}${
+                highlightedName === group.flowerName ? " is-highlighted" : ""
+              }`}
               style={{
                 "--x": `${position.x}%`,
                 "--y": `${position.y}%`,
