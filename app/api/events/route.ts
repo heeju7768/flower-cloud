@@ -6,6 +6,8 @@ type FlowerEntry = {
   studentName: string;
   flowerName: string;
   createdAt: string;
+  colorType: number;
+  shapeType: number;
 };
 
 const store = globalThis as typeof globalThis & {
