@@ -8,6 +8,8 @@ type FlowerEntry = {
   studentName: string;
   flowerName: string;
   createdAt: string;
+  colorType: number;
+  shapeType: number;
 };
 
 const store = globalThis as typeof globalThis & {
@@ -32,6 +34,19 @@ function hasBlockedText(value: string) {
   const normalized = value.toLowerCase().replace(/\s/g, "");
   const blockedWords = ["바보", "멍청", "죽어", "싫어", "꺼져", "fuck", "shit", "개새", "병신"];
   return blockedWords.some(word => normalized.includes(word));
+}
+
+function pickFlowerStyle(flowerName: string) {
+  let hash = 0;
+  for (let index = 0; index < flowerName.length; index += 1) {
+    hash = (hash << 5) - hash + flowerName.charCodeAt(index);
+    hash |= 0;
+  }
+
+  return {
+    colorType: Math.abs(hash) % 6,
+    shapeType: (Math.abs(hash >> 3) % 3) + 1
+  };
 }
 
 function withCounts(items: FlowerEntry[]) {
@@ -60,12 +75,17 @@ export async function POST(request: NextRequest) {
     }
 
     const flowers = getFlowers();
+    const previousStyle = flowers.find(flower => flower.flowerName === flowerName);
+    const style = previousStyle || pickFlowerStyle(flowerName);
+
     flowers.push({
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
       order: flowers.length + 1,
       studentName,
       flowerName,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      colorType: style.colorType,
+      shapeType: style.shapeType
     });
 
     return NextResponse.json({ ok: true }, { status: 201 });

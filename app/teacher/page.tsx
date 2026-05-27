@@ -10,6 +10,8 @@ type FlowerEntry = {
   flowerName: string;
   createdAt: string;
   count: number;
+  colorType: number;
+  shapeType: number;
 };
 
 type FlowerGroup = {
@@ -17,9 +19,11 @@ type FlowerGroup = {
   count: number;
   studentNames: string[];
   firstOrder: number;
+  colorType: number;
+  shapeType: number;
 };
 
-const palette = ["#f8c6d0", "#f7d49f", "#f6e58b", "#bee5c8", "#bfe4f6", "#d8c9f2", "#ffd1b3"];
+const pastelColors = ["#F8AFC2", "#FFD966", "#9EDBF2", "#C8B6EA", "#BFE7A8", "#FFC49B"];
 
 function hashText(text: string) {
   let hash = 0;
@@ -30,24 +34,27 @@ function hashText(text: string) {
   return Math.abs(hash);
 }
 
-function formatDateForFile() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+function fallbackStyle(flowerName: string) {
+  const hash = hashText(flowerName);
+  return {
+    colorType: hash % pastelColors.length,
+    shapeType: (hash % 3) + 1
+  };
 }
 
 function groupFlowers(entries: FlowerEntry[]) {
   const grouped = new Map<string, FlowerGroup>();
 
   entries.forEach(entry => {
+    const fallback = fallbackStyle(entry.flowerName);
     if (!grouped.has(entry.flowerName)) {
       grouped.set(entry.flowerName, {
         flowerName: entry.flowerName,
         count: entry.count,
         studentNames: [],
-        firstOrder: entry.order
+        firstOrder: entry.order,
+        colorType: entry.colorType ?? fallback.colorType,
+        shapeType: entry.shapeType ?? fallback.shapeType
       });
     }
 
@@ -66,14 +73,20 @@ function positionFor(group: FlowerGroup, index: number) {
   const row = Math.floor(index / columns);
   const col = index % columns;
   const baseX = ((col + 0.5) / columns) * 100;
-  const baseY = 16 + row * 18;
-  const wiggleX = (hash % 15) - 7;
-  const wiggleY = ((hash >> 3) % 11) - 5;
+  const baseY = 17 + row * 20;
 
   return {
-    x: Math.max(10, Math.min(90, baseX + wiggleX)),
-    y: Math.max(12, Math.min(88, baseY + wiggleY))
+    x: Math.max(12, Math.min(88, baseX + (hash % 13) - 6)),
+    y: Math.max(16, Math.min(86, baseY + ((hash >> 3) % 9) - 4))
   };
+}
+
+function formatDateForFile() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function downloadFile(filename: string, content: BlobPart, type: string) {
@@ -86,43 +99,152 @@ function downloadFile(filename: string, content: BlobPart, type: string) {
   URL.revokeObjectURL(url);
 }
 
-function drawRoundedRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number
-) {
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.fill();
+function petalSettings(shapeType: number) {
+  if (shapeType === 2) return { count: 10, rx: 17, ry: 43, cy: -52 };
+  if (shapeType === 3) return { count: 12, rx: 11, ry: 30, cy: -45 };
+  return { count: 8, rx: 24, ry: 34, cy: -48 };
 }
 
-function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
-  const lines: string[] = [];
-  let line = "";
+function wrapFlowerName(name: string) {
+  if (name.length <= 5) return [name];
+  return [name.slice(0, 5), name.slice(5, 10)].filter(Boolean);
+}
 
-  [...text].forEach(char => {
-    const next = line + char;
-    if (ctx.measureText(next).width > maxWidth && line) {
-      lines.push(line);
-      line = char;
-    } else {
-      line = next;
-    }
+function FlowerCard({
+  group,
+  color,
+  isHighlighted,
+  onClick,
+  style
+}: {
+  group: FlowerGroup;
+  color: string;
+  isHighlighted: boolean;
+  onClick: () => void;
+  style: CSSProperties & Record<string, string | number>;
+}) {
+  const petals = petalSettings(group.shapeType);
+  const flowerNameLines = wrapFlowerName(group.flowerName);
+  const studentName = group.studentNames.slice(0, 4).join(", ");
+  const darkStroke = "rgba(70, 45, 35, 0.18)";
+
+  return (
+    <button
+      type="button"
+      className={`flower-card${isHighlighted ? " is-highlighted" : ""}`}
+      style={style}
+      aria-label={`${group.flowerName}, ${group.count}번 피었습니다`}
+      onClick={onClick}
+    >
+      <svg className="flower-illustration" viewBox="0 0 200 260" role="img" aria-label={`${group.flowerName} 꽃`}>
+        <g transform="translate(100 90)">
+          {Array.from({ length: petals.count }).map((_, index) => (
+            <ellipse
+              key={index}
+              cx="0"
+              cy={petals.cy}
+              rx={petals.rx}
+              ry={petals.ry}
+              fill={color}
+              stroke={darkStroke}
+              strokeWidth="2"
+              transform={`rotate(${(360 / petals.count) * index})`}
+            />
+          ))}
+
+          <circle
+            className={isHighlighted ? "flower-center-circle is-highlighted" : "flower-center-circle"}
+            cx="0"
+            cy="0"
+            r="52"
+            fill="#FFFDF4"
+            stroke="rgba(255,255,255,0.95)"
+            strokeWidth="5"
+          />
+
+          <text className="flower-text-name" x="0" y={flowerNameLines.length === 1 ? -6 : -18}>
+            {flowerNameLines.map((line, index) => (
+              <tspan key={line} x="0" dy={index === 0 ? 0 : 24}>
+                {line}
+              </tspan>
+            ))}
+          </text>
+          <text className="flower-text-student" x="0" y="31">
+            {studentName}
+          </text>
+        </g>
+
+        <rect x="94" y="137" width="12" height="84" rx="6" fill="#70A83F" />
+        <ellipse cx="70" cy="176" rx="28" ry="15" fill="#91C957" stroke="#6EA241" strokeWidth="2" transform="rotate(-30 70 176)" />
+        <ellipse cx="130" cy="176" rx="28" ry="15" fill="#91C957" stroke="#6EA241" strokeWidth="2" transform="rotate(30 130 176)" />
+      </svg>
+    </button>
+  );
+}
+
+function drawFlowerOnCanvas(
+  ctx: CanvasRenderingContext2D,
+  group: FlowerGroup,
+  color: string,
+  centerX: number,
+  topY: number,
+  scale: number
+) {
+  const petals = petalSettings(group.shapeType);
+  ctx.save();
+  ctx.translate(centerX, topY + 90 * scale);
+  ctx.scale(scale, scale);
+
+  ctx.fillStyle = "#70A83F";
+  ctx.beginPath();
+  ctx.roundRect(94 - 100, 137 - 90, 12, 84, 6);
+  ctx.fill();
+
+  ctx.fillStyle = "#91C957";
+  ctx.strokeStyle = "#6EA241";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.ellipse(-30, 86, 28, 15, -0.52, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(30, 86, 28, 15, 0.52, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  for (let index = 0; index < petals.count; index += 1) {
+    const angle = ((Math.PI * 2) / petals.count) * index;
+    ctx.save();
+    ctx.rotate(angle);
+    ctx.fillStyle = color;
+    ctx.strokeStyle = "rgba(70, 45, 35, 0.18)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(0, petals.cy, petals.rx, petals.ry, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  ctx.fillStyle = "#FFFDF4";
+  ctx.strokeStyle = "rgba(255,255,255,0.95)";
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.arc(0, 0, 52, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "#3f2f25";
+  ctx.textAlign = "center";
+  ctx.font = "900 20px Malgun Gothic, Arial";
+  const lines = wrapFlowerName(group.flowerName);
+  lines.forEach((line, index) => {
+    ctx.fillText(line, 0, (lines.length === 1 ? -6 : -18) + index * 24);
   });
-
-  if (line) lines.push(line);
-  return lines.slice(0, 3);
+  ctx.fillStyle = "#6b5a4f";
+  ctx.font = "700 13px Malgun Gothic, Arial";
+  ctx.fillText(group.studentNames.slice(0, 4).join(", "), 0, 31);
+  ctx.restore();
 }
 
 export default function TeacherPage() {
@@ -188,17 +310,16 @@ export default function TeacherPage() {
 
     const rect = cloudArea.getBoundingClientRect();
     const canvas = document.createElement("canvas");
-    const scale = 2;
-    canvas.width = Math.max(1200, Math.floor(rect.width * scale));
-    canvas.height = Math.max(760, Math.floor(rect.height * scale));
+    const pixelRatio = 2;
+    canvas.width = Math.max(1200, Math.floor(rect.width * pixelRatio));
+    canvas.height = Math.max(760, Math.floor(rect.height * pixelRatio));
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const background = ctx.createLinearGradient(0, 0, 0, canvas.height);
     background.addColorStop(0, "#fff9ed");
-    background.addColorStop(0.62, "#f4f9ed");
-    background.addColorStop(1, "#eef8f9");
+    background.addColorStop(1, "#eef8f1");
     ctx.fillStyle = background;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -209,23 +330,11 @@ export default function TeacherPage() {
 
     groups.forEach((group, index) => {
       const position = positionFor(group, index);
-      const size = Math.min(250, 126 + group.count * 18);
-      const width = size * (canvas.width / rect.width);
-      const height = size * 0.82 * (canvas.height / rect.height);
-      const x = (position.x / 100) * canvas.width - width / 2;
-      const y = (position.y / 100) * canvas.height - height / 2 + 36;
-      const color = palette[hashText(group.flowerName) % palette.length];
-
-      ctx.fillStyle = color;
-      drawRoundedRect(ctx, x, y, width, height, Math.min(width, height) * 0.28);
-      ctx.fillStyle = "#523d33";
-      ctx.font = `900 ${Math.min(48, 25 + group.count * 3)}px Malgun Gothic, Arial`;
-      wrapText(ctx, group.flowerName, width * 0.82).forEach((line, lineIndex, lines) => {
-        ctx.fillText(line, x + width / 2, y + height * 0.45 + (lineIndex - (lines.length - 1) / 2) * 42);
-      });
-      ctx.fillStyle = "rgba(82, 61, 51, 0.78)";
-      ctx.font = "700 22px Malgun Gothic, Arial";
-      ctx.fillText(group.studentNames.slice(0, 3).join(", "), x + width / 2, y + height * 0.78);
+      const scale = Math.min(1.36, 0.78 + group.count * 0.1) * (canvas.width / rect.width);
+      const color = pastelColors[group.colorType % pastelColors.length] || pastelColors[0];
+      const centerX = (position.x / 100) * canvas.width;
+      const topY = (position.y / 100) * canvas.height - 100 * scale;
+      drawFlowerOnCanvas(ctx, group, color, centerX, topY, scale);
     });
 
     canvas.toBlob(blob => {
@@ -293,39 +402,26 @@ export default function TeacherPage() {
 
         {groups.map((group, index) => {
           const position = positionFor(group, index);
-          const size = Math.min(250, 126 + group.count * 18);
-          const color = palette[hashText(group.flowerName) % palette.length];
-          const rotation = (hashText(`${group.flowerName}-turn`) % 18) - 9;
-          const shape = (hashText(`${group.flowerName}-shape`) % 4) + 1;
-          const names = group.studentNames.slice(0, 5).join(", ");
-          const extra = group.studentNames.length > 5 ? ` 외 ${group.studentNames.length - 5}명` : "";
+          const scale = Math.min(1.36, 0.78 + group.count * 0.1);
+          const rotation = (hashText(`${group.flowerName}-turn`) % 10) - 5;
+          const color = pastelColors[group.colorType % pastelColors.length] || pastelColors[0];
 
           return (
-            <button
+            <FlowerCard
               key={group.flowerName}
-              type="button"
-              className={`flower-card flower-shape-${shape}${
-                highlightedName === group.flowerName ? " is-highlighted" : ""
-              }`}
-              style={{
-                "--x": `${position.x}%`,
-                "--y": `${position.y}%`,
-                "--size": `${size}px`,
-                "--count": group.count,
-                "--card-color": color,
-                "--rotate": `${rotation}deg`
-              } as CSSProperties & Record<string, string | number>}
-              aria-label={`${group.flowerName}, ${group.count}번 피었습니다`}
+              group={group}
+              color={color}
+              isHighlighted={highlightedName === group.flowerName}
               onClick={() => setHighlightedName(highlightedName === group.flowerName ? "" : group.flowerName)}
-            >
-              <span className="flower-center">
-                <span className="flower-name">{group.flowerName}</span>
-                <span className="student-names">
-                  {names}
-                  {extra}
-                </span>
-              </span>
-            </button>
+              style={
+                {
+                  "--x": `${position.x}%`,
+                  "--y": `${position.y}%`,
+                  "--scale": scale,
+                  "--rotate": `${rotation}deg`
+                } as CSSProperties & Record<string, string | number>
+              }
+            />
           );
         })}
       </section>

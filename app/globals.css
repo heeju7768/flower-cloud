@@ -21,10 +21,7 @@ body {
   margin: 0;
   color: var(--ink);
   font-family: "Arial Rounded MT Bold", "Nanum Gothic", "Malgun Gothic", system-ui, sans-serif;
-  background:
-    radial-gradient(circle at 15% 16%, rgba(246, 195, 143, 0.34) 0 12%, transparent 13%),
-    radial-gradient(circle at 88% 22%, rgba(184, 223, 242, 0.45) 0 11%, transparent 12%),
-    linear-gradient(180deg, #fff9ed 0%, #f4f9ed 58%, #eef8f9 100%);
+  background: linear-gradient(180deg, #fff9ed 0%, #f4f9ed 58%, #eef8f9 100%);
   letter-spacing: 0;
 }
 
@@ -274,205 +271,64 @@ footer {
 }
 
 .flower-card {
-  align-items: center;
   animation: bloom 540ms cubic-bezier(0.2, 1.15, 0.35, 1) both;
-  aspect-ratio: 1 / 1.22;
-  background:
-    radial-gradient(ellipse at 33% 88%, #9acb58 0 10%, transparent 11%),
-    radial-gradient(ellipse at 67% 88%, #91c151 0 10%, transparent 11%),
-    linear-gradient(90deg, transparent 48%, #6f9f3e 49% 51%, transparent 52%);
-  background-position:
-    20% 84%,
-    80% 84%,
-    center 68%;
-  background-repeat: no-repeat;
-  background-size:
-    36% 18%,
-    36% 18%,
-    100% 34%;
+  aspect-ratio: 200 / 260;
+  background: transparent;
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  color: #523d33;
   cursor: pointer;
-  display: flex;
-  justify-content: flex-start;
   left: var(--x);
-  min-width: 142px;
+  height: 260px;
   overflow: visible;
   padding: 0;
   position: absolute;
-  text-align: center;
   top: var(--y);
-  transform: translate(-50%, -50%) rotate(var(--rotate));
-  width: var(--size);
+  transform: translate(-50%, -50%) rotate(var(--rotate)) scale(var(--scale));
+  transform-origin: center center;
+  width: 200px;
 }
 
-.flower-card::before,
-.flower-card::after {
-  content: "";
-  left: 50%;
-  position: absolute;
-  top: 0;
-  transform: translateX(-50%);
-}
-
-.flower-card::before {
-  aspect-ratio: 1;
-  background: var(--petal-map);
-  filter:
-    drop-shadow(0 2px 0 rgba(255, 255, 255, 0.9))
-    drop-shadow(0 14px 18px rgba(90, 66, 48, 0.16));
-  width: 100%;
-  z-index: 0;
-}
-
-.flower-card::after {
-  aspect-ratio: 1;
-  background: transparent;
-  border: 5px solid rgba(255, 255, 255, 0.95);
-  border-radius: 50%;
-  box-shadow: var(--petal-outline, none);
-  opacity: 0.98;
-  width: 100%;
-  z-index: 1;
+.flower-illustration {
+  display: block;
+  height: 260px;
+  overflow: visible;
+  width: 200px;
 }
 
 .flower-card.is-highlighted {
-  filter: saturate(1.13);
+  filter: drop-shadow(0 0 10px rgba(255, 216, 77, 0.72)) saturate(1.06);
   z-index: 5;
 }
 
-.flower-card.is-highlighted .flower-center {
-  box-shadow:
-    inset 0 0 0 3px color-mix(in srgb, var(--card-color), #ffffff 20%),
-    0 0 0 8px rgba(255, 230, 118, 0.72),
-    0 18px 30px rgba(90, 66, 48, 0.18);
-}
-
-.flower-center {
-  align-items: center;
-  aspect-ratio: 1;
-  background:
-    radial-gradient(circle at 42% 34%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.78) 50%, transparent 76%),
-    #fffaf0;
-  border: 3px dashed color-mix(in srgb, var(--card-color), #7a6a73 48%);
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin: 15.5% auto 0;
-  padding: 0.55rem;
-  position: relative;
-  width: 61%;
-  z-index: 2;
-}
-
-.flower-shape-1 {
-  --petal-map:
-    radial-gradient(circle at 50% 10%, color-mix(in srgb, var(--card-color), white 4%) 0 18%, transparent 19%),
-    radial-gradient(circle at 83% 28%, color-mix(in srgb, var(--card-color), white 7%) 0 18%, transparent 19%),
-    radial-gradient(circle at 83% 70%, color-mix(in srgb, var(--card-color), white 2%) 0 18%, transparent 19%),
-    radial-gradient(circle at 50% 90%, color-mix(in srgb, var(--card-color), white 5%) 0 18%, transparent 19%),
-    radial-gradient(circle at 17% 70%, color-mix(in srgb, var(--card-color), white 8%) 0 18%, transparent 19%),
-    radial-gradient(circle at 17% 28%, var(--card-color) 0 18%, transparent 19%);
-  --petal-outline:
-    0 -37px 0 -27px color-mix(in srgb, var(--card-color), #94636f 38%),
-    32px -19px 0 -27px color-mix(in srgb, var(--card-color), #94636f 38%),
-    32px 19px 0 -27px color-mix(in srgb, var(--card-color), #94636f 38%),
-    0 37px 0 -27px color-mix(in srgb, var(--card-color), #94636f 38%),
-    -32px 19px 0 -27px color-mix(in srgb, var(--card-color), #94636f 38%),
-    -32px -19px 0 -27px color-mix(in srgb, var(--card-color), #94636f 38%);
-}
-
-.flower-shape-2 {
-  --petal-map:
-    radial-gradient(ellipse at 50% 7%, color-mix(in srgb, var(--card-color), white 6%) 0 12%, transparent 13%),
-    radial-gradient(ellipse at 74% 18%, color-mix(in srgb, var(--card-color), white 2%) 0 12%, transparent 13%),
-    radial-gradient(ellipse at 93% 50%, color-mix(in srgb, var(--card-color), white 6%) 0 12%, transparent 13%),
-    radial-gradient(ellipse at 74% 82%, color-mix(in srgb, var(--card-color), white 1%) 0 12%, transparent 13%),
-    radial-gradient(ellipse at 50% 93%, color-mix(in srgb, var(--card-color), white 8%) 0 12%, transparent 13%),
-    radial-gradient(ellipse at 26% 82%, var(--card-color) 0 12%, transparent 13%),
-    radial-gradient(ellipse at 7% 50%, color-mix(in srgb, var(--card-color), white 5%) 0 12%, transparent 13%),
-    radial-gradient(ellipse at 26% 18%, color-mix(in srgb, var(--card-color), white 3%) 0 12%, transparent 13%);
-}
-
-.flower-shape-2::before {
-  transform: translateX(-50%) scaleX(0.95) scaleY(1.06);
-}
-
-.flower-shape-2 .flower-center {
-  width: 58%;
-}
-
-.flower-shape-3 {
-  --petal-map:
-    radial-gradient(circle at 42% 14%, color-mix(in srgb, var(--card-color), white 5%) 0 13%, transparent 14%),
-    radial-gradient(circle at 58% 14%, color-mix(in srgb, var(--card-color), white 5%) 0 13%, transparent 14%),
-    radial-gradient(circle at 82% 42%, color-mix(in srgb, var(--card-color), white 3%) 0 13%, transparent 14%),
-    radial-gradient(circle at 82% 58%, color-mix(in srgb, var(--card-color), white 3%) 0 13%, transparent 14%),
-    radial-gradient(circle at 58% 86%, color-mix(in srgb, var(--card-color), white 6%) 0 13%, transparent 14%),
-    radial-gradient(circle at 42% 86%, color-mix(in srgb, var(--card-color), white 6%) 0 13%, transparent 14%),
-    radial-gradient(circle at 18% 58%, var(--card-color) 0 13%, transparent 14%),
-    radial-gradient(circle at 18% 42%, var(--card-color) 0 13%, transparent 14%);
-}
-
-.flower-shape-3::after {
-  opacity: 0.5;
-}
-
-.flower-shape-3 .flower-center {
-  width: 57%;
-}
-
-.flower-shape-4 {
-  --petal-map:
-    radial-gradient(ellipse at 50% 5%, color-mix(in srgb, var(--card-color), white 6%) 0 9%, transparent 10%),
-    radial-gradient(ellipse at 70% 10%, color-mix(in srgb, var(--card-color), white 3%) 0 9%, transparent 10%),
-    radial-gradient(ellipse at 86% 26%, color-mix(in srgb, var(--card-color), white 5%) 0 9%, transparent 10%),
-    radial-gradient(ellipse at 95% 50%, color-mix(in srgb, var(--card-color), white 2%) 0 9%, transparent 10%),
-    radial-gradient(ellipse at 86% 74%, color-mix(in srgb, var(--card-color), white 4%) 0 9%, transparent 10%),
-    radial-gradient(ellipse at 70% 90%, color-mix(in srgb, var(--card-color), white 7%) 0 9%, transparent 10%),
-    radial-gradient(ellipse at 50% 95%, var(--card-color) 0 9%, transparent 10%),
-    radial-gradient(ellipse at 30% 90%, color-mix(in srgb, var(--card-color), white 3%) 0 9%, transparent 10%),
-    radial-gradient(ellipse at 14% 74%, color-mix(in srgb, var(--card-color), white 5%) 0 9%, transparent 10%),
-    radial-gradient(ellipse at 5% 50%, color-mix(in srgb, var(--card-color), white 2%) 0 9%, transparent 10%),
-    radial-gradient(ellipse at 14% 26%, color-mix(in srgb, var(--card-color), white 4%) 0 9%, transparent 10%),
-    radial-gradient(ellipse at 30% 10%, color-mix(in srgb, var(--card-color), white 6%) 0 9%, transparent 10%);
-}
-
-.flower-shape-4 .flower-center {
-  width: 55%;
-}
-
-.flower-name {
-  font-size: clamp(1.15rem, calc(var(--count) * 0.18rem + 1rem), 2.35rem);
+.flower-text-name {
+  fill: #3f3732;
+  font-family: "Arial Rounded MT Bold", "Nanum Gothic", "Malgun Gothic", system-ui, sans-serif;
+  font-size: 20px;
   font-weight: 900;
-  line-height: 1.08;
-  overflow-wrap: anywhere;
+  text-anchor: middle;
 }
 
-.student-names {
-  color: rgba(82, 61, 51, 0.78);
-  font-size: clamp(0.74rem, calc(var(--count) * 0.05rem + 0.72rem), 1.04rem);
-  font-weight: 900;
-  line-height: 1.22;
-  margin-top: 0.32rem;
-  overflow-wrap: anywhere;
+.flower-text-student {
+  fill: #6b5a4f;
+  font-family: "Nanum Gothic", "Malgun Gothic", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  text-anchor: middle;
 }
 
 @keyframes bloom {
   0% {
     opacity: 0;
-    transform: translate(-50%, -50%) rotate(var(--rotate)) scale(0.24);
+    transform: translate(-50%, -50%) rotate(var(--rotate)) scale(calc(var(--scale) * 0.24));
   }
   72% {
     opacity: 1;
-    transform: translate(-50%, -50%) rotate(var(--rotate)) scale(1.07);
+    transform: translate(-50%, -50%) rotate(var(--rotate)) scale(calc(var(--scale) * 1.07));
   }
   100% {
     opacity: 1;
-    transform: translate(-50%, -50%) rotate(var(--rotate)) scale(1);
+    transform: translate(-50%, -50%) rotate(var(--rotate)) scale(var(--scale));
   }
 }
 
