@@ -315,10 +315,12 @@ export default function TeacherPage() {
               aria-label={`${group.flowerName}, ${group.count}번 피었습니다`}
               onClick={() => setHighlightedName(highlightedName === group.flowerName ? "" : group.flowerName)}
             >
-              <span className="flower-name">{group.flowerName}</span>
-              <span className="student-names">
-                {names}
-                {extra}
+              <span className="flower-center">
+                <span className="flower-name">{group.flowerName}</span>
+                <span className="student-names">
+                  {names}
+                  {extra}
+                </span>
               </span>
             </button>
           );
